@@ -1,7 +1,7 @@
 # Apstra Graph Queries - An Alternative Guide<br>
 
 **Author:** Curtis Call (ccall@juniper.net)<br>
-**Version:** 1.00<br>
+**Version:** 1.01<br>
 **Last Modified:** January 13, 2025<br>
 
 # Purpose
@@ -891,7 +891,7 @@ Match interfaces that are not named "ge-0/0/0" or "ge-0/0/1":
 
 Matches if the property value is null (or None). The default value for many properties is null, so this is way to check if that property has been set or not.
 
-To verify the default value for a property, check the reference design schema (viewable vai the Apstra Graph Explorer). For example, this is the schema for the virtual_network reserved_vlan_id property, which shows that its default value is null:
+To verify the default value for a property, check the reference design schema (viewable via the Apstra Graph Explorer). For example, this is the schema for the virtual_network reserved_vlan_id property, which shows that its default value is null:
 
 ```
     "reserved_vlan_id": {
@@ -1197,6 +1197,34 @@ match(
 ```
 
 The Device Profile Label can now be set to `profile.label` and the System ID to `monitored_system.system_id`.
+
+## General Graph Collector Processor
+
+This processor, which is designed to retrieve any desired data from the graph database, deserves special mention because, while its graph query has the same requirements as the other processors (nodes of interest must be selected and named), it has some unique requirements due to its flexibility in the kind of data it can retrieve.
+
+First, the Value field must contain an expression that retrieves the data value you want included in the "Value" column for the processor. This is the standard NODE_NAME.PROPERTY_NAME syntax. However, because this could match on a variety of data types, there is an additional Data Type field where you must specify whether the Value field is a Number, String, or Discrete State.
+
+Number and String data types are self-explanatory, but Discrete State allows you to translate numeric values into more understandable strings. To make use of it, you would include entries under Value Map, with the number configured along with the string that should be displayed in its place.
+
+If you fill just the Graph Query, Value, and Data Type fields, you are likely to get the following error message when trying to create the probe:
+
+```
+Error configuring probe: Processor generic_graph_collector: runtime configuration error: 'The following properties are not unique across output items (): ()'
+```
+
+This will appear anytime there is more than one item returned by your graph query, which will be the case the majority of the time. The issue is that Apstra needs to know what data field will uniquely identify the different items. This is entered under the Advanced section with "Static context keys". These are one or more key/value pairs that will be added as columns into the processor's results and must provide a way to uniquely identify each separate item.
+
+**Example:**
+
+Display the VLAN ID for all Virtual Networks that have a VLAN configured:
+
+Graph Query: `node("virtual_network", name="vn", reserved_vlan_id=not_none())`
+
+Value: `vn.reserved_vlan_id`
+
+Data Type: `Number`
+
+Advanced > Static context keys: `Name` : `vn.label`
 
 ## Query Tag Filter
 
