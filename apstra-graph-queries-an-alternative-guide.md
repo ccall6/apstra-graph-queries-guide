@@ -1,7 +1,7 @@
 # Apstra Graph Queries - An Alternative Guide<br>
 
-**Author:** Curtis Call (ccall@juniper.net)<br>
-**Version:** 1.02<br>
+**Author:** Curtis Call<br>
+**Version:** 1.03<br>
 **Last Modified:** January 13, 2025<br>
 
 # Purpose
