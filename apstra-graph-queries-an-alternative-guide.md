@@ -1,7 +1,7 @@
 # Apstra Graph Queries - An Alternative Guide<br>
 
 **Author:** Curtis Call (ccall@juniper.net)<br>
-**Version:** 1.01<br>
+**Version:** 1.02<br>
 **Last Modified:** January 13, 2025<br>
 
 # Purpose
@@ -1198,7 +1198,7 @@ match(
 
 The Device Profile Label can now be set to `profile.label` and the System ID to `monitored_system.system_id`.
 
-## General Graph Collector Processor
+## Generic Graph Collector Processor
 
 This processor, which is designed to retrieve any desired data from the graph database, deserves special mention because, while its graph query has the same requirements as the other processors (nodes of interest must be selected and named), it has some unique requirements due to its flexibility in the kind of data it can retrieve.
 
