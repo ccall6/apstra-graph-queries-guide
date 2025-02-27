@@ -1,8 +1,8 @@
 # Apstra Graph Queries - An Alternative Guide<br>
 
 **Author:** Curtis Call<br>
-**Version:** 1.03<br>
-**Last Modified:** January 13, 2025<br>
+**Version:** 1.04<br>
+**Last Modified:** February 27, 2025<br>
 
 # Purpose
 
@@ -22,7 +22,7 @@ Here is an example of a node of type "system", which stores data for a switch or
 
 ```json
 {
-  "system-node": {
+  "system_node": {
     "id": "kzGyd1FQgHxw9y18uA",
     "type": "system",
     "label": "spine1",
@@ -249,7 +249,7 @@ So, five interface nodes matched the query, but zero were returned. Why? The rea
 
 So, with this modified query:
 
-`node('interface', name='interface-node', if_name='ge-0/0/0')`
+`node('interface', name='interface_node', if_name='ge-0/0/0')`
 
 We receive this output:
 
@@ -258,7 +258,7 @@ We receive this output:
   "count": 5,
   "items": [
     {
-      "interface-node": {
+      "interface_node": {
         "id": "RBxGgLo3nTK1jqUu-Q",
         "type": "interface",
         "label": null,
@@ -289,7 +289,7 @@ We receive this output:
       }
     },
     {
-      "interface-node": {
+      "interface_node": {
         "id": "RfEhu-Rscl82v3CAdw",
         "type": "interface",
         "label": null,
@@ -320,7 +320,7 @@ We receive this output:
       }
     },
     {
-      "interface-node": {
+      "interface_node": {
         "id": "o44C5Z71tc1DUa4ZPw",
         "type": "interface",
         "label": null,
@@ -351,7 +351,7 @@ We receive this output:
       }
     },
     {
-      "interface-node": {
+      "interface_node": {
         "id": "Z4cjFDQ8xqjucn0NWQ",
         "type": "interface",
         "label": null,
@@ -382,7 +382,7 @@ We receive this output:
       }
     },
     {
-      "interface-node": {
+      "interface_node": {
         "id": "gyLhBtEFaGkpyQK9tQ",
         "type": "interface",
         "label": null,
@@ -416,11 +416,13 @@ We receive this output:
 }
 ```
 
-So the query still matches the same five nodes, but now those nodes are returned within objects that are each named "interface-node".
+So the query still matches the same five nodes, but now those nodes are returned within objects that are each named "interface_node".
 
 The rules for names are the same as the rules for Python variable names, specifically: they must start with a letter or underscore; they can only contain letters, numbers, and underscores; they are case-sensitive; and they shouldn't use any of the Python keywords (listed here: [Python Keywords](https://docs.python.org/3/reference/lexical_analysis.html#keywords)).
 
-It's critical to understand that `name='interface-node'` and `if_name='ge-0/0/0'` are handled very differently by the above query. The `name` argument is unique. In all other cases, arguments in that format are treated as filters that determine whether or not a node is selected. `if_name` is a property, so only interface nodes with an `if_name` property that matches "ge-0/0/0" will be selected. In contrast, the `name` argument is not a filter. It is an instruction for the graph query to use that name for the nodes it returns via that `node()` function.
+(Note: Hyphens will (usually) technically work within node names, but using them isn't compatible with the `where()` function, and possibly in other scenarios, so it's advisable to not use them.)
+
+It's critical to understand that `name='interface_node'` and `if_name='ge_0/0/0'` are handled very differently by the above query. The `name` argument is unique. In all other cases, arguments in that format are treated as filters that determine whether or not a node is selected. `if_name` is a property, so only interface nodes with an `if_name` property that matches "ge-0/0/0" will be selected. In contrast, the `name` argument is not a filter. It is an instruction for the graph query to use that name for the nodes it returns via that `node()` function.
 
 (Note that you technically can provide a name value positionally within the `node()` function, the same as with the type, as the second argument of `node()`, but this will just cause confusion because `name` has a different position in the `out()` and `in_()` functions. If this statement makes no sense to you, that's fine. It isn't important. Just keep using `name="NAME"` in your `node()` syntax).
 
@@ -443,7 +445,7 @@ node('system', hostname="spine1")
   .in_("link")
   .node("interface")
   .in_("hosted_interfaces")
-  .node("system", name="connected-nodes", hostname=ne("spine1"))
+  .node("system", name="connected_nodes", hostname=ne("spine1"))
 ```
 
 Let's walk through this query chain, but first you should understand that systems have an outbound relationship to interfaces, which have an outbound relationship to links (so a link node is the connection point between the two interface nodes):
@@ -462,7 +464,7 @@ Let's walk though the query steps:
 6. `.in_("link")` - Select all inbound link relationships to the link nodes selected in the prior step
 7. `node("interface")` - Select all interface nodes connected via the relationships selected in the prior step
 8. `in_("hosted_interfaces")` - Select all inbound hosted_interface relationships to the interface nodes selected in the prior step
-9. `node("system", name="connected-nodes", hostname=ne("spine1"))` - Select all system nodes connected via the relationship selected in the prior step if their hostname is not `'spine1'`. The `ne()` function is a property matching function, which will be described below. We need to make sure we don't accidentally match the "spine1" node, which our forwards-and-then-backwards traversal through the graph database would otherwise have done.
+9. `node("system", name="connected_nodes", hostname=ne("spine1"))` - Select all system nodes connected via the relationship selected in the prior step if their hostname is not `'spine1'`. The `ne()` function is a property matching function, which will be described below. We need to make sure we don't accidentally match the "spine1" node, which our forwards-and-then-backwards traversal through the graph database would otherwise have done.
 
 Note that you don't have to actually specify the relationship type in most cases, since the node types on each side of the `out()` or `in_()` will usually  end up limiting the results to the desired type by default. So the following provides the same final output:
 
@@ -475,7 +477,7 @@ node('system', hostname="spine1")
   .in_()
   .node("interface")
   .in_()
-  .node("system", name="connected-nodes", hostname=ne("spine1"))
+  .node("system", name="connected_nodes", hostname=ne("spine1"))
 ```
 
 Notice that a name was only specified in the last function of the chain. This is because we only care about those nodes, so we only need to receive them within our results, which look like this:
@@ -485,7 +487,7 @@ Notice that a name was only specified in the last function of the chain. This is
   "count": 3,
   "items": [
     {
-      "connected-nodes": {
+      "connected_nodes": {
         "id": "-LLiXFXYXTdDJDDw6Q",
         "type": "system",
         "label": "leaf1",
@@ -514,7 +516,7 @@ Notice that a name was only specified in the last function of the chain. This is
       }
     },
     {
-      "connected-nodes": {
+      "connected_nodes": {
         "id": "vdMTITQzcOdJtkthhQ",
         "type": "system",
         "label": "leaf2",
@@ -543,7 +545,7 @@ Notice that a name was only specified in the last function of the chain. This is
       }
     },
     {
-      "connected-nodes": {
+      "connected_nodes": {
         "id": "GVzsonAFrcRqgUdjLw",
         "type": "system",
         "label": "leaf3",
@@ -578,8 +580,8 @@ Match the system connected via "ge-0/0/1" on spine1 and the system connected via
 
 ```
 match(
-  node("system", hostname="spine1").out().node("interface", if_name="ge-0/0/1").out().node("link").in_().node("interface").in_().node("system", name="spine1-connected", hostname=ne("spine1")),
-  node("system", hostname="spine2").out().node("interface", if_name="ge-0/0/2").out().node("link").in_().node("interface").in_().node("system", name="spine2-connected", hostname=ne("spine2"))
+  node("system", hostname="spine1").out().node("interface", if_name="ge-0/0/1").out().node("link").in_().node("interface").in_().node("system", name="spine1_connected", hostname=ne("spine1")),
+  node("system", hostname="spine2").out().node("interface", if_name="ge-0/0/2").out().node("link").in_().node("interface").in_().node("system", name="spine2_connected", hostname=ne("spine2"))
 )`
 ```
 
@@ -590,7 +592,7 @@ And the full output:
   "count": 1,
   "items": [
     {
-      "spine1-connected": {
+      "spine1_connected": {
         "id": "vdMTITQzcOdJtkthhQ",
         "type": "system",
         "label": "leaf2",
@@ -617,7 +619,7 @@ And the full output:
         "system_type": "switch",
         "tags": null
       },
-      "spine2-connected": {
+      "spine2_connected": {
         "id": "GVzsonAFrcRqgUdjLw",
         "type": "system",
         "label": "leaf3",
@@ -678,7 +680,7 @@ Strings are enclosed within quotation marks, either a pair of single quotes or d
 
 **Example:**
 
-`node(type='metadata', name="metadata-node")`
+`node(type='metadata', name="metadata_node")`
 
 Booleans are either `True` or `False`, using that exact capitalization. No quotation marks are used.
 
@@ -688,7 +690,7 @@ Booleans are either `True` or `False`, using that exact capitalization. No quota
 
 Lists (i.e. arrays) are enclosed within brackets `[]`, with a comma between elements. (In the reference design schema, this data type is called an array.)
 
-`node("ip_endpoint", name="endpoint-node", tags=["blue-green"])`
+`node("ip_endpoint", name="endpoint_node", tags=["blue-green"])`
 
 (Note: `tags` is a deprecated property, as described below.)
 
@@ -1121,8 +1123,8 @@ node("system", name="system", hostname=eq("spine1"))
   .in_()
   .node("interface")
   .in_()
-  .node("system", name="remote-system")
-  .ensure_different("system", "remote-system")
+  .node("system", name="remote_system")
+  .ensure_different("system", "remote_system")
 ```
 
 (An alternate approach is shown for the `having()` function.)
